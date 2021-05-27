@@ -1,6 +1,6 @@
-# PlutusCoreEnhanced
+# Plutocrat
 
-Plutus Core Enhanced is a customizable, exchange agnostic cryptocurrency trading bot. You configure:
+Plutocrat is a customizable, exchange agnostic cryptocurrency trading bot. You configure:
 
 * Which cryptocurrencies to buy & sell
 * Profit amount & loss tolerance
@@ -12,7 +12,8 @@ Aroon crossovers, SMA, EMA, DEMA, TEMA, HeikinAshi and CandleStick
 It does the rest by predicting if the price is going up or down for a given coin and buying and selling according to your profit and loss stops.
 * Auto buying function is off for security purpose - **though system is calculating order cost and alert you if not enough balance in your account**
 
-Plutus is currently just a prototype. All contributions are welcome.
+
+Plutocrat is currently just a prototype. All contributions are welcome.
 
 **Feature Wishlist:** [You are most welcome to contribute!]
 1. Enhanced Order and Risk Management
