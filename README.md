@@ -15,7 +15,7 @@ It does the rest by predicting if the price is going up or down for a given coin
 
 Plutocrat is currently just a prototype. All contributions are welcome.
 
-**Feature Wishlist:** [You are most welcome to contribute!]
+**Feature Wishlist:**
 1. Enhanced Order and Risk Management
 2. Automated notification through Telegram and gmail
 
