@@ -3,6 +3,8 @@
     public enum Period
     {
         Hourly,
-        Daily
+        Daily,
+        FifteenMin,
+        FiveMin
     }
 }

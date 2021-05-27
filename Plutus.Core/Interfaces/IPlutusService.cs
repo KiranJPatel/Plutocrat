@@ -22,17 +22,27 @@ namespace Plutus.Core.Interfaces
 
         Task<bool> CheckBalance(decimal cost, string balanceBase);
 
-        Task<PricePrediction> GetPricePrediction(string orderBase, string orderSymbol, Period period);
-
         Task<bool> IsOnline();
         
         Task<List<Tuple<string, Order>>> GetAllOpenOrders();
 
         Task<IEnumerable<Binance.Candlestick>> GetCandlestick(string orderBase, string orderSymbol, Period period);
 
-        Task<PricePrediction> GetTEMAAnalysisPrediction(string orderBase, string orderSymbol, Period period);
+        Task<PricePrediction> GetAroonPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
+
+        Task<PricePrediction> GetParabolicSARPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
+
+        Task<PricePrediction> GetSMAAnalysisPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
+
+        Task<PricePrediction> GetEMAAnalysisPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
+
+        Task<PricePrediction> GetDEMAAnalysisPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
+
+        Task<PricePrediction> GetTEMAAnalysisPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
 
         Task<PricePrediction> GetBullishCandleStickPrediction(string orderBase, string orderSymbol, Period period);
+
+        Task<PricePrediction> GetBullishHeikinAshiCandleStickPrediction(string orderBase, string orderSymbol, Period period);
 
     }
 }

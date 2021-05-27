@@ -20,7 +20,6 @@ namespace Plutus.Core.DI
             builder.RegisterModule<ConfigurationModule>();
             builder.RegisterModule<DatabaseModule>();
             builder.RegisterModule<ExchangeModule>();
-            builder.RegisterModule<TAModule>();
             builder.RegisterModule<PlutusModule>();
 
             return builder.Build();

@@ -25,11 +25,24 @@ namespace Plutus.Core.Jobs
                 var price = await _plutusService.GetPrice(order.Base, order.Symbol);
 
                 // Determine if its going up or down
-                //var prediction = await _plutusService.GetTEMAAnalysisPrediction(order.Base, order.Symbol, Period.Hourly);
 
-                var prediction = await _plutusService.GetBullishCandleStickPrediction(order.Base, order.Symbol, Period.Daily);
+                var prediction = await _plutusService.GetSMAAnalysisPrediction(order.Base, order.Symbol, Period.Hourly, null);
 
-                if (prediction == PricePrediction.Bullish || prediction == PricePrediction.Neutral)
+                //var prediction = await _plutusService.GetEMAAnalysisPrediction(order.Base, order.Symbol, Period.Hourly, null);
+
+                //var prediction = await _plutusService.GetDEMAAnalysisPrediction(order.Base, order.Symbol, Period.Hourly, null);
+
+                //var prediction = await _plutusService.GetTEMAAnalysisPrediction(order.Base, order.Symbol, Period.Hourly, null);
+
+                //var prediction = await _plutusService.GetBullishCandleStickPrediction(order.Base, order.Symbol, Period.FifteenMin);
+
+                //var prediction = await _plutusService.GetBullishHeikinAshiCandleStickPrediction(order.Base, order.Symbol, Period.Hourly);
+
+                //var prediction = await _plutusService.GetParabolicSARPrediction(order.Base, order.Symbol, Period.Hourly, null);
+
+                //var prediction = await _plutusService.GetAroonPrediction(order.Base, order.Symbol, Period.Hourly, null);
+
+                if (prediction == PricePrediction.Bullish)
                 {
                     // If its going up,
                     var buyAmount = order.BuyAmount;

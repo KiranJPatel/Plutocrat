@@ -96,7 +96,6 @@ namespace Plutus.Core.ExchangeHandlers
         
         private async Task OrderBase(OrderSide order, string orderBase, string orderSymbol, decimal amount)
         {
-            throw new NotImplementedException();
             var clientOrder = new MarketOrder(_user)
             {
                 Symbol = $"{orderBase}{orderSymbol}",
@@ -108,7 +107,7 @@ namespace Plutus.Core.ExchangeHandlers
             clientOrder.Validate();
 
             // Send the order.
-            await _binanceClient.PlaceAsync(clientOrder);
+            //await _binanceClient.PlaceAsync(clientOrder);
         }
 
         private CandlestickInterval ConvertPeriodToCandlestickInterval(Period period)
@@ -119,6 +118,10 @@ namespace Plutus.Core.ExchangeHandlers
                     return CandlestickInterval.Hour;
                 case Period.Daily:
                     return CandlestickInterval.Day;
+                case Period.FifteenMin:
+                    return CandlestickInterval.Minutes_15;
+                case Period.FiveMin:
+                    return CandlestickInterval.Minutes_5;
                 default:
                     throw new NotImplementedException();
             }
