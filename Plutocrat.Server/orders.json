@@ -1,0 +1,36 @@
+﻿{
+  "Orders": [
+    {
+      "Base": "BTC",
+      "Symbol": "XRP", //Ripple
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "MATIC", //Polygon
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "ETH", //Ethereum
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "0.1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "LINK", //Link
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    }
+  ]
+}
