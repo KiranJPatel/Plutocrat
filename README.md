@@ -8,6 +8,7 @@ Plutus Core Enhanced is a customizable, exchange agnostic cryptocurrency trading
 * Integrated Technical Analysis libraries
 * Added below strategies [Use for your reference only - Create custom based on your need]:
 Aroon crossovers, SMA, EMA, DEMA, TEMA, HeikinAshi and CandleStick
+* Auto buying function is off for security purpose - **though system is calculating order cost and alert you if not enough balance in your account**
 
 It does the rest by predicting if the price is going up or down for a given coin and buying and selling according to your profit and loss stops.
 
@@ -15,10 +16,9 @@ Plutus is currently just a prototype. All contributions are welcome.
 
 As of now Binance API integration is completed.
 
-Feature Wishlist:
+**Feature Wishlist:** [You are most welcome to contribute!]
 1. Enhanced Order and Risk Management
-2. Custom strategy support
-3. Automated notification through Telegram and gmail
+2. Automated notification through Telegram and gmail
 
 
 
