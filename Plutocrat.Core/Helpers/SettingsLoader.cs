@@ -9,7 +9,9 @@ namespace Plutocrat.Core.Helpers
     {
         public int BuyInterval { get; }
 
-        public int SellInterval { get; }
+        public int PlacedOrderManagementInterval { get; }
+
+        public int DownTrendNotificationJobInterval { get; }
 
         public bool Test { get; }
         
@@ -42,8 +44,10 @@ namespace Plutocrat.Core.Helpers
 
             BuyInterval = GetAppConfig<int>(obj, "BuyInterval");
 
-            SellInterval = GetAppConfig<int>(obj, "SellInterval");
-            
+            PlacedOrderManagementInterval = GetAppConfig<int>(obj, "PlacedOrderManagementInterval");
+
+            DownTrendNotificationJobInterval = GetAppConfig<int>(obj, "DownTrendNotificationJobInterval");
+
             Test = GetAppConfig<bool>(obj, "Test");
             
             RedisUrl = GetAppConfig<string>(obj, "RedisUrl");

@@ -439,10 +439,10 @@ namespace Plutocrat.Core.Helpers
 
             int iArrayLength = lsSimpleMovingAverage.Count;
             if ((currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA1) && currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA2)) ||
-                (currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA2) && currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA3)) ||
-                (currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA1) && currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA2)) &&
-                RSIFinal[iArrayLength - 1] >= 55 && CCIDetailsFinal[iArrayLength - 1] >= 50 && kvoFinal[iArrayLength - 1] > kvoFinal[iArrayLength - 2] &&
-                    kvoFinal[iArrayLength - 2] > kvoFinal[iArrayLength - 3])
+                    (currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA2) && currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA3)) ||
+                    (currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA1) && currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA2)) &&
+                    RSIFinal[iArrayLength - 1] >= 55 && CCIDetailsFinal[iArrayLength - 1] >= 50 && kvoFinal[iArrayLength - 1] > kvoFinal[iArrayLength - 2] &&
+                        kvoFinal[iArrayLength - 2] > kvoFinal[iArrayLength - 3])
             {
                 return PricePrediction.Bullish;
             }

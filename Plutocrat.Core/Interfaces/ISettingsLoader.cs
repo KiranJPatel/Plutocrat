@@ -7,7 +7,9 @@ namespace Plutocrat.Core.Interfaces
     {
         int BuyInterval { get; }
 
-        int SellInterval { get; }
+        int PlacedOrderManagementInterval { get; }
+
+        int DownTrendNotificationJobInterval { get; }
 
         bool Test { get; }
 

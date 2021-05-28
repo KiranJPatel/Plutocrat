@@ -18,13 +18,23 @@ namespace Plutocrat.Core.Helpers
                     .Milliseconds();
             }
 
-            if (settings.SellInterval == 0)
+            if (settings.PlacedOrderManagementInterval == 0)
             {
-                Schedule((() => new SellJob(PlutocratService, settings.Test))).ToRunNow();
+                Schedule((() => new PlacedOrderManagementJob(PlutocratService, settings.Test))).ToRunNow();
             }
             else
             {
-                Schedule((() => new SellJob(PlutocratService, settings.Test))).ToRunNow().AndEvery(settings.SellInterval)
+                Schedule((() => new PlacedOrderManagementJob(PlutocratService, settings.Test))).ToRunNow().AndEvery(settings.PlacedOrderManagementInterval)
+                    .Milliseconds();
+            }
+
+            if (settings.DownTrendNotificationJobInterval == 0)
+            {
+                Schedule((() => new DownTrendNotificationJob(PlutocratService, settings.Test))).ToRunNow();
+            }
+            else
+            {
+                Schedule((() => new DownTrendNotificationJob(PlutocratService, settings.Test))).ToRunNow().AndEvery(settings.DownTrendNotificationJobInterval)
                     .Milliseconds();
             }
 
