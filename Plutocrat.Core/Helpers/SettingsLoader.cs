@@ -13,6 +13,8 @@ namespace Plutocrat.Core.Helpers
 
         public int DownTrendNotificationJobInterval { get; }
 
+        public string TelegramBotApiKey { get; }
+
         public bool Test { get; }
         
         public string RedisUrl { get; }
@@ -47,6 +49,8 @@ namespace Plutocrat.Core.Helpers
             PlacedOrderManagementInterval = GetAppConfig<int>(obj, "PlacedOrderManagementInterval");
 
             DownTrendNotificationJobInterval = GetAppConfig<int>(obj, "DownTrendNotificationJobInterval");
+
+            TelegramBotApiKey = GetAppConfig<string>(obj, "TelegramBotApiKey");
 
             Test = GetAppConfig<bool>(obj, "Test");
             

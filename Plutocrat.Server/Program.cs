@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Autofac;
 using FluentScheduler;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,10 @@ namespace Plutocrat.Server
             var PlutocratService = container.Resolve<IPlutocratService>();
             var settings = container.Resolve<ISettingsLoader>();
             _logger = container.Resolve<ILogger>();
+
+            //Task.Run(async () => await Plutocrat.Core.Helpers.TelegramBot.Main()).Wait();
+
+            Plutocrat.Core.Helpers.Utils.InitializeDependencies();
 
             JobManager.Initialize(new PlutocratRegistry(PlutocratService, settings));
 

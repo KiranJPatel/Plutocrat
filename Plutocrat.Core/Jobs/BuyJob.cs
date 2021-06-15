@@ -26,7 +26,11 @@ namespace Plutocrat.Core.Jobs
 
                 // Determine if its going up or down
 
-                var prediction = await _PlutocratService.GetSMAAnalysisPrediction(order.Base, order.Symbol, Period.Hourly, null);
+                var hourlyPrediction = await _PlutocratService.GetSMAAnalysisPrediction(order.Base, order.Symbol, Period.Hourly, null);
+
+                var dailyPrediction = await _PlutocratService.GetSMAAnalysisPrediction(order.Base, order.Symbol, Period.Daily, null);
+
+                var aroonPrediction = await _PlutocratService.GetAroonPrediction(order.Base, order.Symbol, Period.Hourly, null);
 
                 //var prediction = await _PlutocratService.GetEMAAnalysisPrediction(order.Base, order.Symbol, Period.Hourly, null);
 
@@ -42,7 +46,7 @@ namespace Plutocrat.Core.Jobs
 
                 //var prediction = await _PlutocratService.GetAroonPrediction(order.Base, order.Symbol, Period.Hourly, null);
 
-                if (prediction == PricePrediction.Bullish)
+                if (dailyPrediction.PricePredictionDetails == PricePrediction.Bullish && hourlyPrediction.PricePredictionDetails == PricePrediction.Bullish)
                 {
                     // If its going up,
                     var buyAmount = order.BuyAmount;

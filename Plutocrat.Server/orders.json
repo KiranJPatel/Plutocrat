@@ -1,6 +1,30 @@
 ﻿{
   "Orders": [
     {
+      "Base": "BUSD",
+      "Symbol": "BTC", //Bitcoin
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "ETH", //Ethereum
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "0.1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "DOGE", //Dogecoin
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "0.1"
+    },
+    {
       "Base": "BTC",
       "Symbol": "XRP", //Ripple
       "PLSymbol": "USDT",
@@ -18,15 +42,239 @@
     },
     {
       "Base": "BTC",
-      "Symbol": "ETH", //Ethereum
+      "Symbol": "WRX", //WazirX Coin
       "PLSymbol": "USDT",
       "ProfitStop": "10",
       "LossStop": "10",
-      "BuyAmount": "0.1"
+      "BuyAmount": "1"
     },
     {
       "Base": "BTC",
-      "Symbol": "LINK", //Link
+      "Symbol": "LINK", //ChainLink
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "BNB", //Binance Coin
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "DOT", //Polkadot
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "FIL", //Filecoin
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "EOS", //EOS
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "ENJ", //Enjin
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "ADA", //Cardano
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "CHZ", //Chiliz
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "UNI", //Uniswap
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "ICP", //Internet Computer
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "LTC", //Litecoin
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "SOL", //Solana
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "THETA", //Theta Token
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "VET", //VeChain  
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "XLM", //Stellar Lumens
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "ETC", //Ethereum Classic   
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "TRX", //TRON 
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "XMR", //Monero
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "AAVE", //Aave 
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "NEO", //NEO 
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "TFUEL", //Theta Fuel
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "WBTC", //Wrapped Bitcoin
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "KSM", //Kusama
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "RUNE", //THORChain
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "1INCH", //1inch
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "DATA", //Streamr
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    {
+      "Base": "BTC",
+      "Symbol": "BCH", //Bitcoin Cash
+      "PLSymbol": "USDT",
+      "ProfitStop": "10",
+      "LossStop": "10",
+      "BuyAmount": "1"
+    },
+    //{
+    //  "Base": "BTC",
+    //  "Symbol": "ATA", //Automata Network
+    //  "PLSymbol": "USDT",
+    //  "ProfitStop": "10",
+    //  "LossStop": "10",
+    //  "BuyAmount": "1"
+    //},
+    {
+      "Base": "BUSD",
+      "Symbol": "SHIB", //SHIBA INU
       "PLSymbol": "USDT",
       "ProfitStop": "10",
       "LossStop": "10",

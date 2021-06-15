@@ -2,11 +2,51 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Telegram.Bot;
+using System.Threading.Tasks;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Types.InputFiles;
+using System.IO;
+using Telegram.Bot.Args;
+using Telegram.Bot.Types.InlineQueryResults;
+using System.Net;
 
 namespace Plutocrat.Core.Helpers
 {
-    class Utils
+    public class Utils
     {
+        static readonly string token = "1736851685:AAEFobDNlvQ30B1hALpIFWzijPkYcvfcr8s";
+        static readonly string chatId = "1736851685";
+        static readonly decimal dcLargeBodyMinimum = 0.01M;//greater than 1.0%
+        private static DbHandler mobjDbHandler = null;
+        public static bool InitializeDependencies()
+        {
+            // Initialize dbHandler Instance
+            mobjDbHandler = DbHandler.Instance;
+
+            //open database
+            if (!(mobjDbHandler.OpenConnection()))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static string SendTelegramMessage(string sMessage)
+        {
+            try
+            {
+                var bot = new Telegram.Bot.TelegramBotClient(token);
+                bot.SendTextMessageAsync(chatId, sMessage);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("err");
+            }
+            return "Message Sent";
+        }
         private static int[] GetMaxColumnsWidth(string[,] arrValues)
         {
             var maxColumnsWidth = new int[arrValues.GetLength(1)];
@@ -35,6 +75,34 @@ namespace Plutocrat.Core.Helpers
         public static bool IsBearish(Binance.Candlestick objCurrent)
         {
             return objCurrent.Open > objCurrent.Close;
+        }
+
+        public static bool IsShortBullish(Binance.Candlestick objCurrent)
+        {
+            bool isShortBullish = ((objCurrent.Close > objCurrent.Open) &&
+                ((objCurrent.High - objCurrent.Low) > (3 * (objCurrent.Close - objCurrent.Open))));
+            return isShortBullish;
+        }
+
+        public static bool IsShortBearish(Binance.Candlestick objCurrent)
+        {
+            bool isShortBearish = ((objCurrent.Open > objCurrent.Close) &&
+                ((objCurrent.High - objCurrent.Low) > (3 * (objCurrent.Open - objCurrent.Close)))) ;
+            return isShortBearish;
+        }
+
+        public static bool IsLongBullish(Binance.Candlestick objCurrent)
+        {
+            bool isLongBullish = (objCurrent.Close >= objCurrent.Open * (1 + dcLargeBodyMinimum) && IsBullish(objCurrent)) &&
+                ((objCurrent.Close > objCurrent.Open) && ((objCurrent.Close - objCurrent.Open) / (.001M + objCurrent.High - objCurrent.Low) > 0.6M));
+            return isLongBullish;
+        }
+
+        public static bool IsLongBearish(Binance.Candlestick objCurrent)
+        {
+            bool isLongBearish = (objCurrent.Close <= objCurrent.Open * (1 - dcLargeBodyMinimum) && IsBearish(objCurrent)) &&
+                (objCurrent.Open > objCurrent.Close) && ((objCurrent.Open - objCurrent.Close) / (.001M + objCurrent.High - objCurrent.Low) > 0.6M);
+            return isLongBearish;
         }
 
         public static bool IsGap(Binance.Candlestick objPrevious, Binance.Candlestick objCurrent)
@@ -191,6 +259,70 @@ namespace Plutocrat.Core.Helpers
             }
             return lsHeikinAshi;
         }
+
+        public static List<PivotPoints> CalculatePivotPoints(IEnumerable<Binance.Candlestick> objCandlestickData)
+        {
+
+            List<PivotPoints> lsPivotPoints = new List<PivotPoints>();
+            PivotPoints objPivotPoints = null;
+
+            decimal dcAveragePrice = 0, dcDeMarkFactor = 0;
+            foreach (Binance.Candlestick objCandlestick in objCandlestickData)
+            {
+                objPivotPoints = new PivotPoints();
+                objPivotPoints.HighPrice = objCandlestick.High;
+                objPivotPoints.LowPrice = objCandlestick.Low;
+                objPivotPoints.ClosingPrice = objCandlestick.Close;
+                objPivotPoints.OpeningPrice = objCandlestick.Open;
+
+                dcAveragePrice = ((objPivotPoints.HighPrice + objPivotPoints.LowPrice + objPivotPoints.ClosingPrice) / 3);
+                objPivotPoints.ClassicResistance1 = ((2 * dcAveragePrice) - objPivotPoints.LowPrice);
+                objPivotPoints.ClassicSupport1 = ((2 * dcAveragePrice) - objPivotPoints.HighPrice);
+                objPivotPoints.ClassicResistance2 = dcAveragePrice + (objPivotPoints.HighPrice - objPivotPoints.LowPrice);
+                objPivotPoints.ClassicSupport2 = dcAveragePrice - (objPivotPoints.HighPrice - objPivotPoints.LowPrice);
+                objPivotPoints.ClassicResistance3 = objPivotPoints.HighPrice + 2 * (dcAveragePrice - objPivotPoints.LowPrice);
+                objPivotPoints.ClassicSupport3 = objPivotPoints.LowPrice - 2 * (objPivotPoints.HighPrice - dcAveragePrice);
+                objPivotPoints.ClassicPivotPoint = dcAveragePrice;
+
+                objPivotPoints.WoodiePivotPoint = (objPivotPoints.HighPrice + objPivotPoints.LowPrice + (2 * objPivotPoints.ClosingPrice)) / 4;
+                objPivotPoints.WoodieResistance1 = (2 * objPivotPoints.WoodiePivotPoint) - objPivotPoints.LowPrice;
+                objPivotPoints.WoodieSupport1 = (2 * objPivotPoints.WoodiePivotPoint) - objPivotPoints.HighPrice;
+                objPivotPoints.WoodieResistance2 = objPivotPoints.WoodiePivotPoint + (objPivotPoints.HighPrice - objPivotPoints.LowPrice);
+                objPivotPoints.WoodieSupport2 = objPivotPoints.WoodiePivotPoint - (objPivotPoints.HighPrice - objPivotPoints.LowPrice);
+
+                objPivotPoints.CamarillaResistance1 = objPivotPoints.ClosingPrice + ((objPivotPoints.HighPrice - objPivotPoints.LowPrice) * Convert.ToDecimal(1.0833));
+                objPivotPoints.CamarillaSupport1 = objPivotPoints.ClosingPrice - ((objPivotPoints.HighPrice - objPivotPoints.LowPrice) * Convert.ToDecimal(1.0833));
+                objPivotPoints.CamarillaResistance2 = objPivotPoints.ClosingPrice + ((objPivotPoints.HighPrice - objPivotPoints.LowPrice) * Convert.ToDecimal(1.1666));
+                objPivotPoints.CamarillaSupport2 = objPivotPoints.ClosingPrice - ((objPivotPoints.HighPrice - objPivotPoints.LowPrice) * Convert.ToDecimal(1.1666));
+                objPivotPoints.CamarillaResistance3 = objPivotPoints.ClosingPrice + ((objPivotPoints.HighPrice - objPivotPoints.LowPrice) * Convert.ToDecimal(1.2500));
+                objPivotPoints.CamarillaSupport3 = objPivotPoints.ClosingPrice - ((objPivotPoints.HighPrice - objPivotPoints.LowPrice) * Convert.ToDecimal(1.2500));
+                objPivotPoints.CamarillaResistance4 = objPivotPoints.ClosingPrice + ((objPivotPoints.HighPrice - objPivotPoints.LowPrice) * Convert.ToDecimal(1.5000));
+                objPivotPoints.CamarillaSupport4 = objPivotPoints.ClosingPrice - ((objPivotPoints.HighPrice - objPivotPoints.LowPrice) * Convert.ToDecimal(1.5000));
+
+                dcDeMarkFactor = 0;
+                if (objPivotPoints.ClosingPrice < objPivotPoints.OpeningPrice)
+                {
+                    dcDeMarkFactor = (objPivotPoints.HighPrice + (objPivotPoints.LowPrice * 2) + objPivotPoints.ClosingPrice);
+                }
+                else if (objPivotPoints.ClosingPrice > objPivotPoints.OpeningPrice)
+                {
+                    dcDeMarkFactor = ((objPivotPoints.HighPrice * 2) + objPivotPoints.LowPrice + objPivotPoints.ClosingPrice);
+                }
+                else if (objPivotPoints.ClosingPrice == objPivotPoints.OpeningPrice)
+                {
+                    dcDeMarkFactor = (objPivotPoints.HighPrice + objPivotPoints.LowPrice + (objPivotPoints.ClosingPrice * 2));
+                }
+                objPivotPoints.DeMarkResistance = (dcDeMarkFactor / 2) - objPivotPoints.LowPrice;
+                objPivotPoints.DeMarkSupport = (dcDeMarkFactor / 2) - objPivotPoints.HighPrice;
+
+                objPivotPoints.ChicagoFloorTradingResistance1 = (dcAveragePrice * 2) - objPivotPoints.LowPrice;
+                objPivotPoints.ChicagoFloorTradingResistance2 = dcAveragePrice + (objPivotPoints.HighPrice - objPivotPoints.LowPrice);
+                objPivotPoints.ChicagoFloorTradingSupport1 = (dcAveragePrice * 2) - objPivotPoints.HighPrice;
+                objPivotPoints.ChicagoFloorTradingSupport2 = dcAveragePrice - (objPivotPoints.HighPrice - objPivotPoints.LowPrice);
+                lsPivotPoints.Add(objPivotPoints);
+            }
+            return lsPivotPoints;
+        }
     }
 
     public static class TableParser
@@ -279,6 +411,238 @@ namespace Plutocrat.Core.Helpers
             }
 
             return maxColumnsWidth;
+        }
+
+    }
+
+    public static class TelegramBot
+    {
+        private static TelegramBotClient Bot;
+
+        public static async Task Main()
+        {
+            Bot = new TelegramBotClient("1736851685:AAEFobDNlvQ30B1hALpIFWzijPkYcvfcr8s");
+
+            var me = await Bot.GetMeAsync();
+            Console.Title = me.Username;
+
+            Bot.OnMessage += BotOnMessageReceived;
+            Bot.OnMessageEdited += BotOnMessageReceived;
+            Bot.OnCallbackQuery += BotOnCallbackQueryReceived;
+            Bot.OnInlineQuery += BotOnInlineQueryReceived;
+            Bot.OnInlineResultChosen += BotOnChosenInlineResultReceived;
+            Bot.OnReceiveError += BotOnReceiveError;
+
+            Bot.StartReceiving(Array.Empty<UpdateType>());
+            Console.WriteLine($"Start listening for @{me.Username}");
+
+            Console.ReadLine();
+            Bot.StopReceiving();
+        }
+
+        public static async Task SendTextMesageAsync(string sTextMessage)
+        {
+            var message = new Message();
+            var replyKeyboardMarkup = new ReplyKeyboardMarkup(
+                new KeyboardButton[][]
+                {
+                        new KeyboardButton[] { "1.1", "1.2" },
+                        new KeyboardButton[] { "2.1", "2.2" },
+                },
+                resizeKeyboard: true
+            );
+
+            await Bot.SendTextMessageAsync(
+                chatId: message.Chat.Id,
+                text: sTextMessage,
+                replyMarkup: replyKeyboardMarkup
+
+            );
+        }
+        private static async void BotOnMessageReceived(object sender, MessageEventArgs messageEventArgs)
+        {
+            var message = messageEventArgs.Message;
+            if (message == null || message.Type != MessageType.Text)
+                return;
+
+            switch (message.Text.Split(' ').First())
+            {
+                // Send inline keyboard
+                case "/inline":
+                    await SendInlineKeyboard(message);
+                    break;
+
+                // send custom keyboard
+                case "/keyboard":
+                    await SendReplyKeyboard(message, "Choose");
+                    break;
+
+                // send a photo
+                case "/photo":
+                    await SendDocument(message);
+                    break;
+
+                // request location or contact
+                case "/request":
+                    await RequestContactAndLocation(message);
+                    break;
+
+                default:
+                    await Usage(message);
+                    break;
+            }
+
+            // Send inline keyboard
+            // You can process responses in BotOnCallbackQueryReceived handler
+            static async Task SendInlineKeyboard(Message message)
+            {
+                await Bot.SendChatActionAsync(message.Chat.Id, ChatAction.Typing);
+
+                // Simulate longer running task
+                await Task.Delay(500);
+
+                var inlineKeyboard = new InlineKeyboardMarkup(new[]
+                {
+                    // first row
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData("1.1", "11"),
+                        InlineKeyboardButton.WithCallbackData("1.2", "12"),
+                    },
+                    // second row
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData("2.1", "21"),
+                        InlineKeyboardButton.WithCallbackData("2.2", "22"),
+                    }
+                });
+                await Bot.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: "Choose",
+                    replyMarkup: inlineKeyboard
+                );
+            }
+
+            static async Task SendReplyKeyboard(Message message, String sTextMessage)
+            {
+                if (message == null)
+                {
+                    message = new Message();
+                }
+
+                var replyKeyboardMarkup = new ReplyKeyboardMarkup(
+                    new KeyboardButton[][]
+                    {
+                        new KeyboardButton[] { "1.1", "1.2" },
+                        new KeyboardButton[] { "2.1", "2.2" },
+                    },
+                    resizeKeyboard: true
+                );
+
+                await Bot.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: sTextMessage,
+                    replyMarkup: replyKeyboardMarkup
+
+                );
+            }
+
+            static async Task SendDocument(Message message)
+            {
+                await Bot.SendChatActionAsync(message.Chat.Id, ChatAction.UploadPhoto);
+
+                const string filePath = @"Files/tux.png";
+                using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var fileName = filePath.Split(Path.DirectorySeparatorChar).Last();
+                await Bot.SendPhotoAsync(
+                    chatId: message.Chat.Id,
+                    photo: new InputOnlineFile(fileStream, fileName),
+                    caption: "Nice Picture"
+                );
+            }
+
+            static async Task RequestContactAndLocation(Message message)
+            {
+                var RequestReplyKeyboard = new ReplyKeyboardMarkup(new[]
+                {
+                    KeyboardButton.WithRequestLocation("Location"),
+                    KeyboardButton.WithRequestContact("Contact"),
+                });
+                await Bot.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: "Who or Where are you?",
+                    replyMarkup: RequestReplyKeyboard
+                );
+            }
+
+            static async Task Usage(Message message)
+            {
+                const string usage = "Usage:\n" +
+                                        "/inline   - send inline keyboard\n" +
+                                        "/keyboard - send custom keyboard\n" +
+                                        "/photo    - send a photo\n" +
+                                        "/request  - request location or contact";
+                await Bot.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: usage,
+                    replyMarkup: new ReplyKeyboardRemove()
+                );
+            }
+        }
+
+        // Process Inline Keyboard callback data
+        private static async void BotOnCallbackQueryReceived(object sender, CallbackQueryEventArgs callbackQueryEventArgs)
+        {
+            var callbackQuery = callbackQueryEventArgs.CallbackQuery;
+
+            await Bot.AnswerCallbackQueryAsync(
+                callbackQueryId: callbackQuery.Id,
+                text: $"Received {callbackQuery.Data}"
+            );
+
+            await Bot.SendTextMessageAsync(
+                chatId: callbackQuery.Message.Chat.Id,
+                text: $"Received {callbackQuery.Data}"
+            );
+        }
+
+        #region Inline Mode
+
+        private static async void BotOnInlineQueryReceived(object sender, InlineQueryEventArgs inlineQueryEventArgs)
+        {
+            Console.WriteLine($"Received inline query from: {inlineQueryEventArgs.InlineQuery.From.Id}");
+
+            InlineQueryResultBase[] results = {
+                // displayed result
+                new InlineQueryResultArticle(
+                    id: "3",
+                    title: "TgBots",
+                    inputMessageContent: new InputTextMessageContent(
+                        "hello"
+                    )
+                )
+            };
+            await Bot.AnswerInlineQueryAsync(
+                inlineQueryId: inlineQueryEventArgs.InlineQuery.Id,
+                results: results,
+                isPersonal: true,
+                cacheTime: 0
+            );
+        }
+
+        private static void BotOnChosenInlineResultReceived(object sender, ChosenInlineResultEventArgs chosenInlineResultEventArgs)
+        {
+            Console.WriteLine($"Received inline result: {chosenInlineResultEventArgs.ChosenInlineResult.ResultId}");
+        }
+
+        #endregion
+
+        private static void BotOnReceiveError(object sender, ReceiveErrorEventArgs receiveErrorEventArgs)
+        {
+            Console.WriteLine("Received error: {0} — {1}",
+                receiveErrorEventArgs.ApiRequestException.ErrorCode,
+                receiveErrorEventArgs.ApiRequestException.Message
+            );
         }
     }
 

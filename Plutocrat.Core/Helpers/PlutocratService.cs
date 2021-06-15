@@ -157,10 +157,21 @@ namespace Plutocrat.Core.Helpers
             return candlestick;
         }
 
-        public async Task<PricePrediction> GetAroonPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData)
+        public async Task<PriceDetails> GetAroonPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData)
         {
+            PriceDetails objPriceDetails = new PriceDetails();
             List<AroonOscillatorDetails> lsAroonOscillatorDetails = new List<AroonOscillatorDetails>();
             AroonOscillatorDetails objAroonOscillatorDetails = null;
+            List<string> lsAroonUpTrend = new List<string>();
+            List<string> lsAroonDownTrend = new List<string>();
+            List<string> lsAroonOscTrend = new List<string>();
+            List<string> lsAroonUpDownTrend = new List<string>();
+            IEnumerable<String> lsAroonUpTrendLast15 = null;
+            IEnumerable<String> lsAroonDownTrendLast15 = null;
+            IEnumerable<String> lsAroonOscTrendLast15 = null;
+            IEnumerable<String> lsAroonUpDownTrendLast15 = null;
+
+            IEnumerable<AroonOscillatorDetails> lsAroonOscillatorDetailsLast15 = null;
 
             if (objCandlestickData == null)
             {
@@ -172,7 +183,7 @@ namespace Plutocrat.Core.Helpers
             double[] inputLow = objCandlestickData.AsEnumerable().Select(r => Convert.ToDouble(r.Low)).ToArray();
             double[] inputClose = objCandlestickData.AsEnumerable().Select(r => Convert.ToDouble(r.Close)).ToArray();
 
-            double[] options = new double[] { 14 };
+            double[] options = new double[] { 7 };
             int iFillFactor = tinet.indicators.aroon.start(options);
             int output_length = inputHigh.Length;
             double[] AroonUp = new double[output_length - iFillFactor];
@@ -202,6 +213,7 @@ namespace Plutocrat.Core.Helpers
             CrossOverDetails.CopyTo(CrossOverDetailsFinal, iFillFactor);
 
             string sCrossOverDate = string.Empty;
+            string sLastCrossOverType = string.Empty;
             for (int i = 0; i < inputHigh.Length; i++)
             {
                 objAroonOscillatorDetails = new AroonOscillatorDetails();
@@ -214,16 +226,50 @@ namespace Plutocrat.Core.Helpers
                 {
                     sCrossOverDate = objAroonOscillatorDetails.TradedDate;
                     objAroonOscillatorDetails.CrossOverType = objAroonOscillatorDetails.AroonUp > objAroonOscillatorDetails.AroonDown ? "P" : "N";
+                    sLastCrossOverType = objAroonOscillatorDetails.CrossOverType;
                 }
                 else
                 {
                     objAroonOscillatorDetails.CrossOverType = "X";
                 }
                 objAroonOscillatorDetails.CrossOverDate = sCrossOverDate;
+                objAroonOscillatorDetails.LastCrossOverType = sLastCrossOverType;
+
+                if (i > 1)
+                {
+                    lsAroonUpTrend.Add(AroonUpFinal[i] >= AroonUpFinal[i - 1] ? "P" : "N");
+                    lsAroonDownTrend.Add(AroonDownFinal[i] < AroonDownFinal[i - 1] ? "P" : "N");
+                    lsAroonOscTrend.Add(AroonOscFinal[i] >= AroonOscFinal[i - 1] ? "P" : "N");
+                    lsAroonUpDownTrend.Add(AroonUpFinal[i] >= AroonDownFinal[i] ? "P" : "N");
+
+                    lsAroonUpTrendLast15 = lsAroonUpTrend.Count() > 15 ? lsAroonUpTrend.Skip(Math.Max(0, lsAroonUpTrend.Count() - 15)).Take(15) : lsAroonUpTrend;
+                    objAroonOscillatorDetails.AroonUpTrendLast15Days = string.Join("", lsAroonUpTrendLast15);
+
+                    lsAroonDownTrendLast15 = lsAroonDownTrend.Count() > 15 ? lsAroonDownTrend.Skip(Math.Max(0, lsAroonDownTrend.Count() - 15)).Take(15) : lsAroonDownTrend;
+                    objAroonOscillatorDetails.AroonDownTrendLast15Days = string.Join("", lsAroonDownTrendLast15);
+
+                    lsAroonOscTrendLast15 = lsAroonOscTrend.Count() > 15 ? lsAroonOscTrend.Skip(Math.Max(0, lsAroonOscTrend.Count() - 15)).Take(15) : lsAroonOscTrend;
+                    objAroonOscillatorDetails.AroonOscTrendLast15Days = string.Join("", lsAroonOscTrendLast15);
+
+                    lsAroonUpDownTrendLast15 = lsAroonUpDownTrend.Count() > 15 ? lsAroonUpDownTrend.Skip(Math.Max(0, lsAroonUpDownTrend.Count() - 15)).Take(15) : lsAroonUpDownTrend;
+                    objAroonOscillatorDetails.AroonUpDownTrendLast15Days = string.Join("", lsAroonUpDownTrendLast15);
+                }
+                else
+                {
+                    objAroonOscillatorDetails.AroonUpTrendLast15Days = string.Empty;
+                    objAroonOscillatorDetails.AroonDownTrendLast15Days = string.Empty;
+                    objAroonOscillatorDetails.AroonOscTrendLast15Days = string.Empty;
+                    objAroonOscillatorDetails.AroonUpDownTrendLast15Days = string.Empty;
+                }
+                
                 lsAroonOscillatorDetails.Add(objAroonOscillatorDetails);
             }
 
-            return PricePrediction.Neutral;
+            lsAroonOscillatorDetailsLast15 = lsAroonOscillatorDetails.Skip(Math.Max(0, lsAroonOscillatorDetails.Count() - 15)).Take(15);
+
+            objPriceDetails.AroonOscillatorDtls = objAroonOscillatorDetails;
+
+            return objPriceDetails;
         }
 
         public async Task<PricePrediction> GetParabolicSARPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData)
@@ -281,17 +327,36 @@ namespace Plutocrat.Core.Helpers
             return PricePrediction.Neutral;
         }
 
-        public async Task<PricePrediction> GetSMAAnalysisPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData)
+        public async Task<PriceDetails> GetSMAAnalysisPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData)
         {
+            PriceDetails objPriceDetails = new PriceDetails();
             List<SimpleMovingAverage> lsSimpleMovingAverage = new List<SimpleMovingAverage>();
+            List<PivotPoints> lsPivotPoints = new List<PivotPoints>();
             SimpleMovingAverage objSimpleMovingAverage = null;
+            List<double> lsVolume15Days = new List<double>();
+            List<double> lsKVO15Days = new List<double>();
 
             if (objCandlestickData == null)
             {
                 objCandlestickData = await _binanceHandler.GetCandlestick(orderBase, orderSymbol, period);
             }
 
+            if (objCandlestickData.Count() == 0)
+            {
+                objPriceDetails.PricePredictionDetails = PricePrediction.Neutral;
+                return objPriceDetails;
+            }
+
+            int iTickCount = objCandlestickData.Count();
+
             int iSMA1 = miMA7, iSMA2 = miMA14, iSMA3 = miMA26;
+
+            if (iTickCount < iSMA1 || iTickCount < iSMA2 || iTickCount < iSMA3)
+            {
+                Console.WriteLine($"{orderSymbol} returned records:{objCandlestickData.Count()}");
+                objPriceDetails.PricePredictionDetails = PricePrediction.Neutral;
+                return objPriceDetails;
+            }
 
             string[] tradedDate = objCandlestickData.Select(r => r.OpenTime.ToString()).ToArray();
             double[] inputHigh = objCandlestickData.AsEnumerable().Select(r => Convert.ToDouble(r.High)).ToArray();
@@ -300,7 +365,7 @@ namespace Plutocrat.Core.Helpers
             double[] inputVolume = objCandlestickData.AsEnumerable().Select(r => Convert.ToDouble(r.Volume)).ToArray();
 
             Decimal currentPrice = await _binanceHandler.GetPrice(orderBase, orderSymbol);
-
+            objPriceDetails.CurrentPrice = currentPrice;
 
 
             double[] options = new double[] { iSMA1 };
@@ -356,9 +421,71 @@ namespace Plutocrat.Core.Helpers
             double[] SMA3CrossOverDetailsFinal = new double[output_length];
             SMA3CrossOverDetails.CopyTo(SMA3CrossOverDetailsFinal, iFillFactor);
 
+            //RSI
+            options = new double[] { miRSI };
+            iFillFactor = tinet.indicators.rsi.start(options);
+            output_length = inputClose.Length;
+            double[] rsiDetails = new double[output_length - iFillFactor];
+            double[][] rsiInputs = { inputClose };
+            double[][] RSIData = { rsiDetails };
+
+            success = tinet.indicators.rsi.run(rsiInputs, options, RSIData);
+            double[] RSIFinal = new double[output_length];
+            rsiDetails.CopyTo(RSIFinal, iFillFactor);
+
+            //CCI
+            options = new double[] { miCCI };
+            iFillFactor = tinet.indicators.cci.start(options);
+            double[] CCIDetails = new double[output_length - iFillFactor];
+            double[][] CCIInputs = { inputHigh, inputLow, inputClose };
+            double[][] CCIDetailsData = { CCIDetails };
+            success = tinet.indicators.cci.run(CCIInputs, options, CCIDetailsData);
+            double[] CCIDetailsFinal = new double[output_length];
+            CCIDetails.CopyTo(CCIDetailsFinal, iFillFactor);
+
+            // Klinger Volume Oscillator
+            options = new double[] { 5, 14 };
+            iFillFactor = tinet.indicators.kvo.start(options);
+            double[] kvoDetails = new double[output_length - iFillFactor];
+
+
+            double[][] kvoData = { kvoDetails };
+            double[][] kvoInputs = { inputHigh, inputLow, inputClose, inputVolume };
+            success = tinet.indicators.kvo.run(kvoInputs, options, kvoData);
+            double[] kvoFinal = new double[output_length];
+            kvoDetails.CopyTo(kvoFinal, iFillFactor);
+
+            // On Balance Volume
+            options = new double[] { 7 };
+            iFillFactor = tinet.indicators.obv.start(options);
+            double[] obvDetails = new double[output_length - iFillFactor];
+            double[][] obvData = { obvDetails };
+            double[][] obvInputs = { inputClose, inputVolume };
+            success = tinet.indicators.obv.run(obvInputs, options, obvData);
+            double[] obvFinal = new double[output_length];
+            obvDetails.CopyTo(obvFinal, iFillFactor);
+
+            // Volume Weighted Moving Average
+            options = new double[] { 7 };
+            iFillFactor = tinet.indicators.vwma.start(options);
+            double[] vwmaDetails = new double[output_length - iFillFactor];
+            double[][] vwmaData = { vwmaDetails };
+            double[][] vwmaInputs = { inputClose, inputVolume };
+            success = tinet.indicators.vwma.run(vwmaInputs, options, vwmaData);
+            double[] vwmaFinal = new double[output_length];
+            vwmaDetails.CopyTo(vwmaFinal, iFillFactor);
+
+
+            lsVolume15Days = inputVolume.ToList().Skip(Math.Max(0, inputVolume.Length - 15)).Take(15).ToList();
+            lsKVO15Days = kvoFinal.ToList().Skip(Math.Max(0, kvoFinal.Length - 15)).Take(15).ToList();
+
             string sSMA1CrossOverDate = string.Empty;
             string sSMA2CrossOverDate = string.Empty;
             string sSMA3CrossOverDate = string.Empty;
+            
+            List<string> lsCCITrend = new List<string>();
+            List<string> lsRSITrend = new List<string>();
+            List<string> lsKVoTrend = new List<string>();
             for (int i = 0; i < inputClose.Length - 1; i++)
             {
                 objSimpleMovingAverage = new SimpleMovingAverage();
@@ -398,65 +525,68 @@ namespace Plutocrat.Core.Helpers
                 }
                 objSimpleMovingAverage.SMA3CrossOverDate = sSMA3CrossOverDate;
                 lsSimpleMovingAverage.Add(objSimpleMovingAverage);
-            }
-
-            //RSI
-            options = new double[] { miRSI };
-            iFillFactor = tinet.indicators.rsi.start(options);
-            output_length = inputClose.Length;
-            double[] rsiDetails = new double[output_length - iFillFactor];
-            double[][] rsiInputs = { inputClose };
-            double[][] RSIData = { rsiDetails };
-
-            success = tinet.indicators.rsi.run(rsiInputs, options, RSIData);
-            double[] RSIFinal = new double[output_length];
-            rsiDetails.CopyTo(RSIFinal, iFillFactor);
-
-            //CCI
-            options = new double[] { miCCI };
-            iFillFactor = tinet.indicators.cci.start(options);
-            double[] CCIDetails = new double[output_length - iFillFactor];
-            double[][] CCIInputs = {inputHigh , inputLow, inputClose };
-            double[][] CCIDetailsData = { CCIDetails };
-            success = tinet.indicators.cci.run(CCIInputs, options, CCIDetailsData);
-            double[] CCIDetailsFinal = new double[output_length];
-            CCIDetails.CopyTo(CCIDetailsFinal, iFillFactor);
-
-            // Klinger Volume Oscillator
-            options = new double[] { 5, 14 };
-            iFillFactor = tinet.indicators.kvo.start(options);
-            double[] kvoDetails = new double[output_length - iFillFactor];
 
 
-            double[][] kvoData = { kvoDetails };
-            double[][] kvoInputs = { inputHigh, inputLow, inputClose, inputVolume };
-            success = tinet.indicators.kvo.run(kvoInputs, options, kvoData);
-            double[] kvoFinal = new double[output_length];
-            kvoDetails.CopyTo(kvoFinal, iFillFactor);
+                if(i>1)
+                {
+                    lsCCITrend.Add(CCIDetailsFinal[i] >= CCIDetailsFinal[i - 1] ? "P" : "N");
+                    lsRSITrend.Add(RSIFinal[i] >= RSIFinal[i - 1] ? "P" : "N");
+                    lsKVoTrend.Add(kvoFinal[i] >= kvoFinal[i - 1] ? "P" : "N");
+                }
+            }           
 
+            
+            lsPivotPoints = Utils.CalculatePivotPoints(objCandlestickData);
+
+            objPriceDetails.PivotPointsDetails = lsPivotPoints[lsPivotPoints.Count - 1];
 
             objSimpleMovingAverage = lsSimpleMovingAverage[lsSimpleMovingAverage.Count - 1];
 
+            objPriceDetails.MovingAverageShort = Convert.ToDecimal(objSimpleMovingAverage.SMA1);
+            objPriceDetails.MovingAverageMedium = Convert.ToDecimal(objSimpleMovingAverage.SMA2);
+            objPriceDetails.MovingAverageLong = Convert.ToDecimal(objSimpleMovingAverage.SMA3);
+
             int iArrayLength = lsSimpleMovingAverage.Count;
+
+            objPriceDetails.CCI = CCIDetailsFinal[iArrayLength - 1];
+            objPriceDetails.CCIDailyTrend = String.Join("", lsCCITrend.Skip(Math.Max(0, lsCCITrend.Count() - 15)).Take(15));
+            objPriceDetails.RSI = RSIFinal[iArrayLength - 1];
+            objPriceDetails.RSIDailyTrend = String.Join("", lsRSITrend.Skip(Math.Max(0, lsRSITrend.Count() - 15)).Take(15));
+            objPriceDetails.KlingerVolumeOscillator = kvoFinal[iArrayLength - 1];
+            objPriceDetails.KVODailyTrend = String.Join("", lsKVoTrend.Skip(Math.Max(0, lsKVoTrend.Count() - 15)).Take(15));
+
+            double dbPreviousPrice = inputClose[iArrayLength - 1];
+            double dbPreviousVolume = inputVolume[iArrayLength - 1];
+            double dbCurrentVolume = inputVolume[iArrayLength];
+
+            objPriceDetails.PriceSurge = (Convert.ToDouble(currentPrice) * 100 / dbPreviousPrice) - 100;
+            objPriceDetails.VolumeSurge = (dbCurrentVolume * 100 / dbPreviousVolume) - 100;
+
+            objPriceDetails.VolumeTrending = dbCurrentVolume > lsVolume15Days.Average() ? "P" : "N";
+            objPriceDetails.KVOTrending = objPriceDetails.KlingerVolumeOscillator > lsKVO15Days.Average() ? "P" : "N";
+            objPriceDetails.OBVTrending = obvFinal[iArrayLength - 1] > obvFinal[iArrayLength - 2] ? "P" : "N";
+            objPriceDetails.VWAPTrending = vwmaFinal[iArrayLength - 1] > vwmaFinal[iArrayLength - 2] ? "P" : "N";
+
             if ((currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA1) && currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA2)) ||
                     (currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA2) && currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA3)) ||
                     (currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA1) && currentPrice > Convert.ToDecimal(objSimpleMovingAverage.SMA2)) &&
-                    RSIFinal[iArrayLength - 1] >= 55 && CCIDetailsFinal[iArrayLength - 1] >= 50 && kvoFinal[iArrayLength - 1] > kvoFinal[iArrayLength - 2] &&
-                        kvoFinal[iArrayLength - 2] > kvoFinal[iArrayLength - 3])
+                    RSIFinal[iArrayLength - 1] >= 45 && CCIDetailsFinal[iArrayLength - 1] > 0)
             {
-                return PricePrediction.Bullish;
+                objPriceDetails.PricePredictionDetails = PricePrediction.Bullish;
+                return objPriceDetails;
             }
             else if ((currentPrice < Convert.ToDecimal(objSimpleMovingAverage.SMA1) && currentPrice < Convert.ToDecimal(objSimpleMovingAverage.SMA2)) ||
                 (currentPrice < Convert.ToDecimal(objSimpleMovingAverage.SMA2) && currentPrice < Convert.ToDecimal(objSimpleMovingAverage.SMA3)) ||
                 (currentPrice < Convert.ToDecimal(objSimpleMovingAverage.SMA1) && currentPrice < Convert.ToDecimal(objSimpleMovingAverage.SMA2)) &&
-                RSIFinal[iArrayLength - 1] <= 55 && CCIDetailsFinal[iArrayLength - 1] <= 50 && kvoFinal[iArrayLength - 1] < kvoFinal[iArrayLength - 2] &&
-                    kvoFinal[iArrayLength - 2] < kvoFinal[iArrayLength - 3])
+                RSIFinal[iArrayLength - 1] < 45 && CCIDetailsFinal[iArrayLength - 1] <= 0)
             {
-                return PricePrediction.Bearish;
+                objPriceDetails.PricePredictionDetails = PricePrediction.Bearish;
+                return objPriceDetails;
             }
             else
             {
-                return PricePrediction.Neutral;
+                objPriceDetails.PricePredictionDetails = PricePrediction.Neutral;
+                return objPriceDetails;
             }
         }
 
@@ -734,11 +864,11 @@ namespace Plutocrat.Core.Helpers
             List<TripleExponentialMovingAverage> lsTripleExponentialMovingAverage = new List<TripleExponentialMovingAverage>();
             TripleExponentialMovingAverage objTripleExponentialMovingAverage = null;
 
-            if(objCandlestickData==null)
+            if (objCandlestickData == null)
             {
                 objCandlestickData = await _binanceHandler.GetCandlestick(orderBase, orderSymbol, period);
             }
-            
+
             int iTEMA1 = miMA7, iTEMA2 = miMA14, iTEMA3 = miMA26;
 
             string[] tradedDate = objCandlestickData.Select(r => r.OpenTime.ToString()).ToArray();
@@ -863,9 +993,13 @@ namespace Plutocrat.Core.Helpers
             }
         }
 
-        public async Task<PricePrediction> GetBullishCandleStickPrediction(string orderBase, string orderSymbol, Period period)
+        public async Task<PricePrediction> GetCandleStickPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData)
         {
-            IEnumerable<Binance.Candlestick> objCandlestickData = await _binanceHandler.GetCandlestick(orderBase, orderSymbol, period);
+            if (objCandlestickData == null)
+            {
+                objCandlestickData = await _binanceHandler.GetCandlestick(orderBase, orderSymbol, period);
+            }
+
             int iCounter = 0;
 
             int iArrayCount = objCandlestickData.Count();
@@ -942,11 +1076,15 @@ namespace Plutocrat.Core.Helpers
             }
         }
 
-        public async Task<PricePrediction> GetBullishHeikinAshiCandleStickPrediction(string orderBase, string orderSymbol, Period period)
+        public async Task<PriceDetails> GetHeikinAshiCandleStickPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData)
         {
+            PriceDetails objPriceDetails = new PriceDetails();
             try
             {
-                IEnumerable<Binance.Candlestick> objCandlestickData = await _binanceHandler.GetCandlestick(orderBase, orderSymbol, period);
+                if (objCandlestickData == null)
+                {
+                    objCandlestickData = await _binanceHandler.GetCandlestick(orderBase, orderSymbol, period);
+                }
 
                 List<HeikinAshi> lsHeikinAshi = Utils.GenerateHeikinAshi(objCandlestickData);
 
@@ -972,6 +1110,10 @@ namespace Plutocrat.Core.Helpers
                 iCounter = 0;
                 bool[] bIsBullish = new bool[iArrayCount];
                 bool[] bIsBearish = new bool[iArrayCount];
+                bool[] bIsShortBullish = new bool[iArrayCount];
+                bool[] bIsShortBearish = new bool[iArrayCount];
+                bool[] bIsLongBullish = new bool[iArrayCount];
+                bool[] bIsLongBearish = new bool[iArrayCount];
                 bool[] bIsGapUpOpening = new bool[iArrayCount];
                 bool[] bIsGapDownOpening = new bool[iArrayCount];
                 bool[] bIsStrongBullishBarReversal = new bool[iArrayCount];
@@ -983,6 +1125,10 @@ namespace Plutocrat.Core.Helpers
                 {
                     bIsBullish[iCounter] = Utils.IsBullish(objCurrent);
                     bIsBearish[iCounter] = Utils.IsBearish(objCurrent);
+                    bIsShortBullish[iCounter] = Utils.IsShortBullish(objCurrent);
+                    bIsShortBearish[iCounter] = Utils.IsShortBearish(objCurrent);
+                    bIsLongBullish[iCounter] = Utils.IsLongBullish(objCurrent);
+                    bIsLongBearish[iCounter] = Utils.IsLongBearish(objCurrent);
                     bIsGapUpOpening[iCounter] = Utils.IsGapUpOpening(objPrevious, objCurrent);
                     bIsGapDownOpening[iCounter] = Utils.IsGapDownOpening(objPrevious, objCurrent);
                     bIsStrongBullishBarReversal[iCounter] = Utils.IsStrongBullishBarReversal(objPrevious, objCurrent);
@@ -1036,6 +1182,10 @@ namespace Plutocrat.Core.Helpers
                     objCandleStickPattern.LowPrice = objCurrent.Low;
                     objCandleStickPattern.IsBullish = bIsBullish[iCounter];
                     objCandleStickPattern.IsBearish = bIsBearish[iCounter];
+                    objCandleStickPattern.IsShortBullish = bIsShortBullish[iCounter];
+                    objCandleStickPattern.IsShortBearish = bIsShortBearish[iCounter];
+                    objCandleStickPattern.IsLongBullish = bIsLongBullish[iCounter];
+                    objCandleStickPattern.IsLongBearish = bIsLongBearish[iCounter];
                     objCandleStickPattern.IsBullishHammerStick = (objCdlHammer.Integer[iCounter] == 100);
                     objCandleStickPattern.IsBearishHammerStick = (objCdlHammer.Integer[iCounter] == -100);
                     objCandleStickPattern.IsBullishSpinningTop = (objCdlSpinningTop.Integer[iCounter] == 100);
@@ -1083,10 +1233,10 @@ namespace Plutocrat.Core.Helpers
                     objCandleStickPattern.IsBullishShortLine = (objCdlShortLine.Integer[iCounter] == 100);
                     objCandleStickPattern.IsBearishShortLine = (objCdlShortLine.Integer[iCounter] == -100);
 
-                    if (objCandleStickPattern.IsStrongBullishBarReversal) { lsCandlesticks.Add("StrongBullishBarReversal"); };
-                    if (objCandleStickPattern.IsBullishBarReversal) { lsCandlesticks.Add("BullishBarReversal"); };
-                    if (objCandleStickPattern.IsStrongBearishBarReversal) { lsCandlesticks.Add("StrongBearishBarReversal"); };
-                    if (objCandleStickPattern.IsBearishBarReversal) { lsCandlesticks.Add("BearishBarReversal"); };
+                    if (objCandleStickPattern.IsShortBullish) { lsCandlesticks.Add("IsShortBullish"); };
+                    if (objCandleStickPattern.IsShortBearish) { lsCandlesticks.Add("IsShortBearish"); };
+                    if (objCandleStickPattern.IsLongBullish) { lsCandlesticks.Add("IsLongBullish"); };
+                    if (objCandleStickPattern.IsLongBearish) { lsCandlesticks.Add("IsLongBearish"); };
                     if (objCandleStickPattern.IsBullishHammerStick) { lsCandlesticks.Add("BullishHammerStick"); };
                     if (objCandleStickPattern.IsBearishHammerStick) { lsCandlesticks.Add("BearishHammerStick"); };
                     if (objCandleStickPattern.IsBullishSpinningTop) { lsCandlesticks.Add("BullishSpinningTop"); };
@@ -1133,6 +1283,10 @@ namespace Plutocrat.Core.Helpers
                         if (objCandleStickPattern.IsBearish) { lsCandlesticks.Add("Bearish"); };
                         if (objCandleStickPattern.IsGapUpOpening) { lsCandlesticks.Add("GapUpOpening"); };
                         if (objCandleStickPattern.IsGapDownOpening) { lsCandlesticks.Add("GapDownOpening"); };
+                        if (objCandleStickPattern.IsStrongBullishBarReversal) { lsCandlesticks.Add("StrongBullishBarReversal"); };
+                        if (objCandleStickPattern.IsBullishBarReversal) { lsCandlesticks.Add("BullishBarReversal"); };
+                        if (objCandleStickPattern.IsStrongBearishBarReversal) { lsCandlesticks.Add("StrongBearishBarReversal"); };
+                        if (objCandleStickPattern.IsBearishBarReversal) { lsCandlesticks.Add("BearishBarReversal"); };
                     }
 
                     objCandleStickPattern.CombinedCandlestickDetails = string.Join(", ", lsCandlesticks);
@@ -1142,58 +1296,21 @@ namespace Plutocrat.Core.Helpers
                     iCounter++;
                 }
 
-
-
-                //RSI
-                double[] options = new double[] { miRSI };
-                int iFillFactor = tinet.indicators.rsi.start(options);
-                int output_length = dbHeikinAshiHigh.Length;
-                double[] rsiDetails = new double[output_length - iFillFactor];
-                double[][] rsiInputs = { dbHeikinAshiClose };
-                double[][] RSIData = { rsiDetails };
-
-                int success = tinet.indicators.rsi.run(rsiInputs, options, RSIData);
-                double[] RSIFinal = new double[output_length];
-                rsiDetails.CopyTo(RSIFinal, iFillFactor);
-
-                //CCI
-                options = new double[] { miCCI };
-                iFillFactor = tinet.indicators.cci.start(options);
-                double[] CCIDetails = new double[output_length - iFillFactor];
-                double[][] inputs = { dbHeikinAshiHigh, dbHeikinAshiLow, dbHeikinAshiClose };
-                double[][] CCIDetailsData = { CCIDetails };
-                success = tinet.indicators.cci.run(inputs, options, CCIDetailsData);
-                double[] CCIDetailsFinal = new double[output_length];
-                CCIDetails.CopyTo(CCIDetailsFinal, iFillFactor);
-
-                // Klinger Volume Oscillator
-                options = new double[] { 5, 14 };
-                iFillFactor = tinet.indicators.kvo.start(options);
-                double[] kvoDetails = new double[output_length - iFillFactor];
-
-
-                double[][] kvoData = { kvoDetails };
-                double[][] kvoInputs = { dbHeikinAshiHigh, dbHeikinAshiLow, dbHeikinAshiClose, dbVolume };
-                success = tinet.indicators.kvo.run(kvoInputs, options, kvoData);
-                double[] kvoFinal = new double[output_length];
-                kvoDetails.CopyTo(kvoFinal, iFillFactor);
-
-                // Can be optimized to check bullish pattern in last 3 candles i.e. iArrayLength, iArrayLength -1 and iArrayLength-2
-                if (RSIFinal[iArrayLength - 1] >= 55 && CCIDetailsFinal[iArrayLength - 1] >= 50 && kvoFinal[iArrayLength - 1] > kvoFinal[iArrayLength - 2] &&
-                    kvoFinal[iArrayLength - 2] > kvoFinal[iArrayLength - 3])
+                IEnumerable<CandleStickPatterns> LstItems = lsCandleStickPatterns.Skip(Math.Max(0, lsCandleStickPatterns.Count() - 20)).Take(20);
+                List<string> lsCandlestikPatternsLastItems = new List<string>();
+                foreach (CandleStickPatterns objCandleStickPatterns in LstItems)
                 {
-                    return PricePrediction.Bullish;
+                    lsCandlestikPatternsLastItems.Add(String.Format("Date:{0}, Close:{1}, Candle:{2}", objCandleStickPatterns.TradedDate, objCandleStickPatterns.ClosingPrice, objCandleStickPatterns.CombinedCandlestickDetails));
                 }
-                else
-                {
-                    return PricePrediction.Neutral;
-                }
+                objPriceDetails.HeikinAshiCandlestick = String.Join(" # ", lsCandlestikPatternsLastItems);
+                objPriceDetails.HeikinAshiDetails = lsHeikinAshi[lsHeikinAshi.Count - 1];
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return PricePrediction.Neutral;
+                objPriceDetails.PricePredictionDetails = PricePrediction.Neutral;
             }
+            return objPriceDetails;
         }
     }
 }

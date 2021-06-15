@@ -28,11 +28,11 @@ namespace Plutocrat.Core.Interfaces
 
         Task<IEnumerable<Binance.Candlestick>> GetCandlestick(string orderBase, string orderSymbol, Period period);
 
-        Task<PricePrediction> GetAroonPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
+        Task<PriceDetails> GetAroonPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
 
         Task<PricePrediction> GetParabolicSARPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
 
-        Task<PricePrediction> GetSMAAnalysisPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
+        Task<PriceDetails> GetSMAAnalysisPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
 
         Task<PricePrediction> GetEMAAnalysisPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
 
@@ -40,9 +40,9 @@ namespace Plutocrat.Core.Interfaces
 
         Task<PricePrediction> GetTEMAAnalysisPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
 
-        Task<PricePrediction> GetBullishCandleStickPrediction(string orderBase, string orderSymbol, Period period);
+        Task<PricePrediction> GetCandleStickPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
 
-        Task<PricePrediction> GetBullishHeikinAshiCandleStickPrediction(string orderBase, string orderSymbol, Period period);
+        Task<PriceDetails> GetHeikinAshiCandleStickPrediction(string orderBase, string orderSymbol, Period period, IEnumerable<Binance.Candlestick> objCandlestickData);
 
     }
 }

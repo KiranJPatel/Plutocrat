@@ -28,6 +28,21 @@ namespace Plutocrat.Core.Helpers
 
         [Display(Name = "CrossOver Date")]
         public string CrossOverDate { get; set; }
+
+        [Display(Name = "Last CrossOver Type")]
+        public string LastCrossOverType { get; set; }
+
+        [Display(Name = "Aroon Up Trend Last 15 Days")]
+        public string AroonUpTrendLast15Days { get; set; }
+
+        [Display(Name = "Aroon Down Trend Last 15 Days")]
+        public string AroonDownTrendLast15Days { get; set; }
+
+        [Display(Name = "Aroon Osc Trend Last 15 Days")]
+        public string AroonOscTrendLast15Days { get; set; }
+
+        [Display(Name = "Aroon Up Down Trend Last 15 Days")]
+        public string AroonUpDownTrendLast15Days { get; set; }
     }
 
     public class SimpleMovingAverage
@@ -234,6 +249,10 @@ namespace Plutocrat.Core.Helpers
 
         public bool IsBullish { get; set; }
         public bool IsBearish { get; set; }
+        public bool IsShortBullish { get; set; }
+        public bool IsShortBearish { get; set; }
+        public bool IsLongBullish { get; set; }
+        public bool IsLongBearish { get; set; }
         public bool IsBullishHammerStick { get; set; }
         public bool IsBearishHammerStick { get; set; }
         public bool IsBullishInvertedHammerStick { get; set; }
@@ -336,6 +355,101 @@ namespace Plutocrat.Core.Helpers
         public bool IsUniqueThreeRiver { get; set; }
         public bool IsUpsideGapTwoCrows { get; set; }
         public bool IsXSideGap3Methods { get; set; }
+    }
+
+    public class PivotPoints
+    {
+        [Display(Name = "High Price")]
+        public decimal HighPrice { get; set; }
+
+        [Display(Name = "Low Price")]
+        public decimal LowPrice { get; set; }
+
+        [Display(Name = "Opening Price")]
+        public decimal OpeningPrice { get; set; }
+
+        [Display(Name = "Closing Price")]
+        public decimal ClosingPrice { get; set; }
+
+        [Display(Name = "Classic Resistance 1")]
+        public decimal ClassicResistance1 { get; set; }
+
+        [Display(Name = "Classic Resistance 2")]
+        public decimal ClassicResistance2 { get; set; }
+
+        [Display(Name = "Classic Resistance 3")]
+        public decimal ClassicResistance3 { get; set; }
+
+        [Display(Name = "Classic Pivot Point")]
+        public decimal ClassicPivotPoint { get; set; }
+
+        [Display(Name = "Classic Support 1")]
+        public decimal ClassicSupport1 { get; set; }
+
+        [Display(Name = "Classic Support 2")]
+        public decimal ClassicSupport2 { get; set; }
+
+        [Display(Name = "Classic Support 3")]
+        public decimal ClassicSupport3 { get; set; }
+
+        [Display(Name = "Woodie Resistance 1")]
+        public decimal WoodieResistance1 { get; set; }
+
+        [Display(Name = "Woodie Resistance 2")]
+        public decimal WoodieResistance2 { get; set; }
+
+        [Display(Name = "Woodie Pivot Point")]
+        public decimal WoodiePivotPoint { get; set; }
+
+        [Display(Name = "Woodie Support 1")]
+        public decimal WoodieSupport1 { get; set; }
+
+        [Display(Name = "Woodie Support 2")]
+        public decimal WoodieSupport2 { get; set; }
+
+        [Display(Name = "Camarilla Resistance 1")]
+        public decimal CamarillaResistance1 { get; set; }
+
+        [Display(Name = "Camarilla Resistance 2")]
+        public decimal CamarillaResistance2 { get; set; }
+
+        [Display(Name = "Camarilla Resistance 3")]
+        public decimal CamarillaResistance3 { get; set; }
+
+        [Display(Name = "Camarilla Resistance 4")]
+        public decimal CamarillaResistance4 { get; set; }
+
+        [Display(Name = "Camarilla Support 1")]
+        public decimal CamarillaSupport1 { get; set; }
+
+        [Display(Name = "Camarilla Support 2")]
+        public decimal CamarillaSupport2 { get; set; }
+
+        [Display(Name = "Camarilla Support 3")]
+        public decimal CamarillaSupport3 { get; set; }
+
+        [Display(Name = "Camarilla Support 4")]
+        public decimal CamarillaSupport4 { get; set; }
+
+        [Display(Name = "DeMark Resistance")]
+        public decimal DeMarkResistance { get; set; }
+
+        [Display(Name = "DeMark Support")]
+        public decimal DeMarkSupport { get; set; }
+
+        [Display(Name = "Chicago Floor Trading Support 1")]
+        public decimal ChicagoFloorTradingSupport1 { get; set; }
+
+        [Display(Name = "Chicago Floor Trading Support 2")]
+        public decimal ChicagoFloorTradingSupport2 { get; set; }
+
+        [Display(Name = "Chicago Floor Trading Resistance 1")]
+        public decimal ChicagoFloorTradingResistance1 { get; set; }
+
+        [Display(Name = "Chicago Floor Trading Resistance 2")]
+        public decimal ChicagoFloorTradingResistance2 { get; set; }
+
+
     }
 
 }
